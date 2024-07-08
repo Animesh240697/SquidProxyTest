@@ -1,0 +1,3 @@
+---
+- include_task: install.yml
+- include_task: whitelist.yml

@@ -1,0 +1,40 @@
+---
+- name: Ensure squid.allowed.sites.txt exists (and create if missing)
+  file:
+    path: /etc/squid/squid.allowed.sites.txt
+    state: touch
+    mode: 640
+    owner: root
+    group: root
+
+- name: Get status of squid.allowed.sites.txt
+  stat:
+    path: /etc/squid/squid.allowed.sites.txt
+  register: squid_file_stat
+
+- name: Take a backup of the file (if it exists)
+  ansible.builtin.command:
+    cmd: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bak
+  when: squid_file_stat.stat.exists
+
+- name: Add new URLs to squid.allowed.sites.txt (avoid duplicates)
+  lineinfile:
+    path: /etc/squid/squid.allowed.sites.txt
+    regexp: ^{{ item }}$
+    line: "{{ item }}"
+    state: present
+  loop: "{{ new_urls }}"
+  register: lineinfile_results
+
+- name: Fail if any URL addition failed
+  fail:
+    msg: Failed to add some URLs to squid.allowed.sites.txt
+  when: item.failed
+  loop: "{{ lineinfile_results.results }}"
+  loop_control:
+    loop_var: item
+
+- name: Reload Squid service (always)
+  ansible.builtin.service:
+    name: squid
+    state: reloaded

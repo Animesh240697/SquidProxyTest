@@ -1,0 +1,8 @@
+---
+- name: Deploy Squid Proxies
+  hosts: "{{ GROUP_NAME }}"
+  remote_user: vcs_cloudops
+  become: yes
+
+  roles:
+    - squid
