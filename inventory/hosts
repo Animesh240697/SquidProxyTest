@@ -1,2 +1,6 @@
 [proxy_group1]
 10.161.7.142
+
+[all:vars]
+GROUP_NAME=proxy_group1
+
