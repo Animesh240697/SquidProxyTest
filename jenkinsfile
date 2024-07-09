@@ -12,10 +12,11 @@ pipeline {
                     def proxy_group = params.PROXY_GROUP
 
                     sh """
-                    ansible-playbook -i inventory/hosts --ask-become-pass -e 'ansible_ssh_common_args=-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' site.yml --limit ${proxy_group}
+                    ansible-playbook -i inventory/hosts --ask-become-pass -e 'ansible_ssh_common_args="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" GROUP_NAME=${proxy_group}' site.yml --limit ${proxy_group}
                     """
                 }
             }
         }
     }
 }
+
