@@ -17,7 +17,7 @@ pipeline {
                         def proxy_group = params.PROXY_GROUP
 
                         sh """
-                        ansible-playbook -i inventory/hosts --ask-become-pass -e GROUP_NAME=${proxy_group} site.yml
+                        ansible-playbook -i inventory/hosts --ask-become-pass -e GROUP_NAME=${proxy_group} site.yml -vvv
                         """
                     }
                 }
