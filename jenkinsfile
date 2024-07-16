@@ -1,22 +1,22 @@
 pipeline {
-    agent any
+  agent any
 
-    parameters {
-        choice(name: 'PROXY_GROUP', choices: ['proxy_group1', 'proxy_group2', 'proxy_group3'], description: 'Select the proxy group to update')
-    }
+  parameters {
+    choice(name: 'PROXY_GROUP', choices: ['proxy_group1', 'proxy_group2', 'proxy_group3'], description: 'Select the proxy group to update')
+  }
 
-    stages {
-        stage('Deploy Squid Proxy') {
-            steps {
-                ssshagent(['vcs_cloudops']) {
-                    def proxy_group = params.PROXY_GROUP
+  stages {
+    stage('Deploy Squid Proxy') {
+      steps {
+        ssshagent(['vcs_cloudops']) {
+          def proxy_group = params.PROXY_GROUP  // Moved inside steps closure
 
-                    sh """
-                    ansible-playbook -i inventory/hosts --ask-become-pass -e 'ansible_ssh_common_args=-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' site.yml --limit ${proxy_group}
-                    """
-                }
-            }
+          sh """
+          ansible-playbook -i inventory/hosts --ask-become-pass -e 'ansible_ssh_common_args=-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' site.yml --limit ${proxy_group}
+          """
         }
+      }
     }
+  }
 }
 
