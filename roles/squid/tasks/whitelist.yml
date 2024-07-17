@@ -1,8 +1,4 @@
 ---
-- name: Set group_var_name
-  set_fact:
-    group_var_name: "{{ GROUP_NAME }}"
-
 - name: Ensure squid.allowed.sites.txt exists (and create if missing)
   file:
     path: /etc/squid/squid.allowed.sites.txt
@@ -17,14 +13,12 @@
   register: squid_file_stat
 
 - name: Take a backup of the file (if it exists)
-  command:
-    cmd: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bak
+  command: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bak
   when: squid_file_stat.stat.exists
 
 - name: Load group vars dynamically
   include_vars:
-    file: "group_vars/{{ group_var_name }}.yml"
-  register: group_vars
+    file: "group_vars/{{ GROUP_NAME }}.yml"
 
 - name: Add new URLs to squid.allowed.sites.txt (avoid duplicates)
   lineinfile:
@@ -32,7 +26,7 @@
     regexp: "^{{ item }}$"
     line: "{{ item }}"
     state: present
-  loop: "{{ group_vars.new_urls }}"
+  loop: "{{ new_urls }}"
   register: lineinfile_results
 
 - name: Fail if any URL addition failed
