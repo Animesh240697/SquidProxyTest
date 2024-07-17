@@ -1,4 +1,4 @@
-squid_allowed_sites:
+new_urls:
   - ".amazonaws.com"
   - ".vficloud.net"
   - ".prodvficloud.net"
