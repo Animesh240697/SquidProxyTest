@@ -13,7 +13,7 @@
   register: squid_file_stat
 
 - name: Take a backup of the file (if it exists)
-  command: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bak
+  command: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bakp
   when: squid_file_stat.stat.exists
 
 - name: Load group vars dynamically
