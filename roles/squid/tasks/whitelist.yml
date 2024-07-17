@@ -1,9 +1,13 @@
 ---
+- name: Set group_var_name
+  set_fact:
+    group_var_name: "{{ GROUP_NAME }}"
+
 - name: Ensure squid.allowed.sites.txt exists (and create if missing)
   file:
     path: /etc/squid/squid.allowed.sites.txt
     state: touch
-    mode: 640
+    mode: '0640'
     owner: root
     group: root
 
@@ -13,28 +17,34 @@
   register: squid_file_stat
 
 - name: Take a backup of the file (if it exists)
-  ansible.builtin.command:
+  command:
     cmd: cp /etc/squid/squid.allowed.sites.txt /etc/squid/squid.allowed.sites.txt.bak
   when: squid_file_stat.stat.exists
+
+- name: Load group vars dynamically
+  include_vars:
+    file: "group_vars/{{ group_var_name }}.yml"
+  register: group_vars
 
 - name: Add new URLs to squid.allowed.sites.txt (avoid duplicates)
   lineinfile:
     path: /etc/squid/squid.allowed.sites.txt
-    regexp: ^{{ item }}$
+    regexp: "^{{ item }}$"
     line: "{{ item }}"
     state: present
-  loop: "{{ lookup('file', 'squid-test/group_vars/{{ lookup('env', 'GROUP_NAME') }}.yml', wantlist=True) | map(attribute='new_urls') | flatten }}"
+  loop: "{{ group_vars.new_urls }}"
   register: lineinfile_results
 
 - name: Fail if any URL addition failed
   fail:
-    msg: Failed to add some URLs to squid.allowed.sites.txt
+    msg: "Failed to add some URLs to squid.allowed.sites.txt"
   when: item.failed
   loop: "{{ lineinfile_results.results }}"
   loop_control:
     loop_var: item
 
 - name: Reload Squid service (always)
-  ansible.builtin.service:
+  service:
     name: squid
     state: reloaded
+
