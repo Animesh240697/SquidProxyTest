@@ -23,7 +23,7 @@
     regexp: ^{{ item }}$
     line: "{{ item }}"
     state: present
-  loop: "{{ new_urls }}"
+  loop: "{{ lookup('file', 'squid-test/group_vars/{{ lookup('env', 'GROUP_NAME') }}.yml', wantlist=True) | map(attribute='new_urls') | flatten }}"
   register: lineinfile_results
 
 - name: Fail if any URL addition failed
